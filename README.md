@@ -7,44 +7,11 @@
 
 A CLI turn-based strategy RPG where you build armies, expand your empire, and conquer the world. Open source, runs in any terminal.
 
-## Screenshot
+## Screenshots
 
-```
-  ╔════════════════════════════╗
-  ║  ⚔️  E M P I R E  CLI  👑  ║
-  ╚════════════════════════════╝
-
-  👑 Iron Legion  —  Turn 1
-  💰 20  🍖 10  🪵 5  🪨 15
-  ⚔️  Armies: 5  |  🚩 Territories: 2/8
-
-  World Map:
-  🏰 Northkeep      Iron Legion ⚔️  3 ★
-     ↔ Iron Hills, Greenwood
-  ⛰️  Iron Hills     Iron Legion ⚔️  2 ★
-     ↔ Northkeep, Crossroads
-  🌲 Greenwood      Green Pact ⚔️  2
-     ↔ Northkeep, Crossroads, Silver Bay
-  🌾 Crossroads     Unclaimed
-     ↔ Iron Hills, Greenwood, Desert Gate, Stonehaven
-  🏰 Silver Bay     Green Pact ⚔️  3
-     ↔ Greenwood, Stonehaven
-  ⛰️  Dragon Peak    Void Covenant ⚔️  4
-     ↔ Stonehaven
-
-  Turn 1 [3/3 actions] > recruit northkeep 2
-  🛡️  Recruited 2 units in Northkeep. (💰-6 🍖-4)
-
-  Turn 1 [2/3 actions] > attack iron crossroads
-  🔥 Battle: Iron Hills (5) → Crossroads (0)
-  Decisive victory! The defenders are routed!
-  🚩 You captured Crossroads!
-
-  --- End of Turn 1 ---
-  🔥 Enemy Actions:
-  Green Pact recruited 3 units in Greenwood
-  Sand Empire attacks Stonehaven from Desert Gate!
-```
+| Main Menu | Gameplay |
+|:---------:|:--------:|
+| ![Menu](assets/screenshot-menu.png) | ![Gameplay](assets/screenshot-gameplay.png) |
 
 ## Quick Start
 
