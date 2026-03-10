@@ -5,6 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
+    "empire-cli": "dist/index.js",
     "empire": "dist/index.js"
   },
   "scripts": {

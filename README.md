@@ -46,6 +46,10 @@ A CLI turn-based strategy RPG where you build armies, expand your empire, and co
 ## Quick Start
 
 ```bash
+# Play instantly (no install needed)
+npx empire-cli
+
+# Or clone for development
 git clone https://github.com/lppduy/empire-cli.git
 cd empire-cli
 npm install
