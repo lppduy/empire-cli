@@ -273,9 +273,15 @@ async function mainMenu(): Promise<void> {
   printLine(chalk.bold.cyan('  ╚════════════════════════════╝\n'));
   printLine('  1. New Game');
   printLine('  2. Load Game');
-  printLine('  3. Quit\n');
+  printLine('  3. Tutorial');
+  printLine('  4. Quit\n');
 
   const choice = await ask('  Choose: ');
+  if (choice.trim() === '3') {
+    await showTutorial();
+    return mainMenu();
+  }
+  if (choice.trim() === '4') { rl.close(); process.exit(0); }
   if (choice.trim() === '1') {
     printLine('\nChoose your faction:');
     printLine('  1. 🔴 Iron Legion (aggressive)');
@@ -295,5 +301,105 @@ async function mainMenu(): Promise<void> {
     await runGameLoop(state);
   } else { rl.close(); process.exit(0); }
 }
+
+// ─── Tutorial ────────────────────────────────────────────────────────────────
+
+async function showTutorial(): Promise<void> {
+  const pages = [
+    // Page 1: Overview
+    [
+      chalk.bold.cyan('\n  ═══ HOW TO PLAY ═══\n'),
+      chalk.bold('  🎯 Goal'),
+      '  Conquer all 8 territories on the map to win.',
+      '  You start with 2 territories. Enemy factions hold the rest.',
+      '',
+      chalk.bold('  ⏳ Turns'),
+      '  Each turn you get 3 actions. Actions are:',
+      '    • recruit — train new soldiers',
+      '    • move    — march armies between territories',
+      '    • attack  — invade enemy territory',
+      '    • build   — construct buildings',
+      '',
+      '  Free commands (unlimited): look, info, status, help, save',
+      '  Type "next" to end your turn early.',
+    ],
+    // Page 2: Economy & Resources
+    [
+      chalk.bold.cyan('\n  ═══ RESOURCES ═══\n'),
+      chalk.bold('  💰 Gold  — recruit armies (3g each, 2g with barracks)'),
+      chalk.bold('  🍖 Food  — recruit armies (2f each) + army upkeep (1f/unit/turn)'),
+      chalk.bold('  🪵 Wood  — build structures'),
+      chalk.bold('  🪨 Stone — build structures'),
+      '',
+      '  Each territory produces resources every turn.',
+      '  More territories = more income = bigger army.',
+      '',
+      chalk.bold('  💡 Tip: ') + 'Use "info <territory>" to see resource output.',
+    ],
+    // Page 3: Combat
+    [
+      chalk.bold.cyan('\n  ═══ COMBAT ═══\n'),
+      '  Attack from YOUR territory into an ADJACENT enemy territory.',
+      '  Example: attack crossroads greenwood',
+      '',
+      chalk.bold('  Terrain defense bonuses:'),
+      '    🌾 Plains   — x1.0 (no bonus)',
+      '    🌲 Forest   — x1.2',
+      '    🏰 City     — x1.3',
+      '    ⛰️  Mountain — x1.5',
+      '',
+      chalk.bold('  Outcomes depend on power ratio:'),
+      '    2:1+ → Decisive victory (low losses)',
+      '    1.2:1 → Victory (moderate losses)',
+      '    ~1:1 → Pyrrhic (heavy losses both sides)',
+      '    Below → Defeat (you lose units, they don\'t)',
+      '',
+      chalk.bold('  💡 Tip: ') + 'Outnumber defenders 2:1 for clean wins.',
+    ],
+    // Page 4: Buildings
+    [
+      chalk.bold.cyan('\n  ═══ BUILDINGS ═══\n'),
+      '  Build structures to strengthen your territories.',
+      '  Command: build <territory> <type>',
+      '',
+      '  🧱 Walls      10🪵 15🪨   +0.3 defense bonus',
+      '  🏛️ Barracks    8🪵  5🪨   recruit costs 2💰 instead of 3💰',
+      '  🏪 Market     10💰  5🪵 3🪨  +2💰 income per turn',
+      '',
+      '  Each territory can have all 3 buildings.',
+      '  Buildings show as icons on the map next to your territory.',
+      '',
+      chalk.bold('  💡 Tip: ') + 'Build markets early for economy, walls on borders.',
+    ],
+    // Page 5: Strategy
+    [
+      chalk.bold.cyan('\n  ═══ STRATEGY TIPS ═══\n'),
+      '  1. Don\'t rush — build your economy first (markets!)',
+      '  2. Recruit in bulk, then attack with overwhelming force',
+      '  3. Mountains are hard to capture — bring 2x defenders',
+      '  4. Each territory keeps a garrison of 2 when moving',
+      '  5. Watch enemy actions at end of turn — defend borders',
+      '  6. Build barracks in your main recruiting territory',
+      '  7. Build walls on border territories facing enemies',
+      '',
+      chalk.bold('  🏆 Factions:'),
+      '  🔴 Iron Legion  — starts strong, aggressive AI',
+      '  🟢 Green Pact   — high food/wood, defensive AI',
+      '  🟡 Sand Empire  — rich in gold, balanced AI',
+      '  🟣 Void Covenant — mountain fortress, cautious AI',
+    ],
+  ];
+
+  for (let i = 0; i < pages.length; i++) {
+    pages[i].forEach((line) => printLine(line));
+    printLine('');
+    if (i < pages.length - 1) {
+      await ask(chalk.gray(`  [Page ${i + 1}/${pages.length}] Press Enter for next page...`));
+    } else {
+      await ask(chalk.gray(`  [Page ${pages.length}/${pages.length}] Press Enter to return to menu...`));
+    }
+  }
+}
+
 
 mainMenu().catch((err) => { console.error(chalk.red('Fatal:'), err); process.exit(1); });
