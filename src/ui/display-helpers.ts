@@ -74,7 +74,7 @@ export function printSpatialMap(state: GameState): void {
     const colorFn = owner ? ((chalk as any)[owner.color] ?? chalk.white) : chalk.gray;
     const icon = ICONS[t.type] ?? '?';
     const armies = t.armies > 0 ? `⚔${t.armies}` : '';
-    const star = t.owner === state.playerFactionId ? '★' : '';
+    const star = t.owner === state.playerFactionId ? chalk.bold.green('★') : '';
     const bldg = (t.buildings ?? []).map((b) => BUILDINGS[b]?.icon ?? '').join('');
     // Pad name to 10 chars for alignment
     const label = t.name.slice(0, 10).padEnd(10);
@@ -94,10 +94,12 @@ export function printSpatialMap(state: GameState): void {
 
   // Legend
   const factions = [...state.factions.values()];
-  const legend = factions.map((f) => {
+  const player = state.factions.get(state.playerFactionId)!;
+  const playerColorFn = (chalk as any)[player.color] ?? chalk.white;
+  printLine(`  ${chalk.bold.green('★')} = You (${playerColorFn(player.name)})`);
+  const legend = [...state.factions.values()].map((f) => {
     const colorFn = (chalk as any)[f.color] ?? chalk.white;
-    const terrCount = f.territories.length;
-    return colorFn(`${f.name}(${terrCount})`);
+    return colorFn(`■ ${f.name}(${f.territories.length})`);
   }).join('  ');
   printLine(`  ${legend}`);
   printLine('');
