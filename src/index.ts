@@ -9,6 +9,8 @@ import { newGame, saveGame, loadGame, listSaves, checkWinCondition } from './sta
 import { processTurnResources } from './engine/resource-calculator.js';
 import { resolveCombat } from './engine/combat-resolver.js';
 import { recruitArmy, findArmyInTerritory, applyCasualties, getUnitsInTerritory, ensureArmyRecord } from './engine/army-manager.js';
+import { buildStructure, BUILDINGS, getRecruitGoldCost } from './engine/building-manager.js';
+import type { BuildingType } from './game-types.js';
 import { printLine, printSeparator, printStatus, printHelp, printMap, printTerritoryInfo, ICONS } from './ui/display-helpers.js';
 import { runAiTurns } from './engine/ai-turn-processor.js';
 
@@ -94,7 +96,8 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
 
       const err = recruitArmy(player, terr, n, state.armies);
       if (err) { printLine(chalk.red(err)); break; }
-      printLine(chalk.green(`${ICONS.shield} Recruited ${n} units in ${terr.name}. (${ICONS.gold}-${n * 3} ${ICONS.food}-${n * 2})`));
+      const goldCost = getRecruitGoldCost(terr);
+      printLine(chalk.green(`${ICONS.shield} Recruited ${n} units in ${terr.name}. (${ICONS.gold}-${n * goldCost} ${ICONS.food}-${n * 2})`));
       break;
     }
 
@@ -112,7 +115,7 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       if (!attackerArmy || attackerArmy.units === 0) { printLine(chalk.red(`No army in ${from.name}.`)); break; }
 
       printLine(chalk.yellow(`\n  ${ICONS.fire} Battle: ${from.name} (${attackerArmy.units}) → ${to.name} (${to.armies})`));
-      const result = resolveCombat(attackerArmy.units, attackerArmy.morale, to.armies, 80, to.type);
+      const result = resolveCombat(attackerArmy.units, attackerArmy.morale, to.armies, 80, to.type, to);
       result.log.forEach((l) => printLine(`  ${l}`));
 
       applyCasualties(attackerArmy, result.attackerCasualties, player, state.armies, from);
@@ -131,6 +134,30 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       } else {
         printLine(chalk.red(`\n  ${ICONS.skull} The attack failed.`));
       }
+      break;
+    }
+
+    case 'build': {
+      // build <territory> <type>
+      if (args.length < 2) {
+        printLine('Usage: build <territory> <walls|barracks|market>');
+        printLine('');
+        for (const b of Object.values(BUILDINGS)) {
+          const costParts = Object.entries(b.cost).filter(([, v]) => v > 0).map(([k, v]) => `${v}${k[0]}`);
+          printLine(`  ${b.icon} ${b.label.padEnd(10)} ${costParts.join(' ').padEnd(12)} ${b.description}`);
+        }
+        printLine('');
+        break;
+      }
+      const buildType = args[args.length - 1].toLowerCase() as BuildingType;
+      const buildTerrName = args.slice(0, -1).join(' ');
+      const buildTerr = findTerritory(state, buildTerrName);
+      if (!buildTerr) { printLine(chalk.red(`Territory "${buildTerrName}" not found.`)); break; }
+      const buildErr = buildStructure(player, buildTerr, buildType);
+      if (buildErr) { printLine(chalk.red(buildErr)); break; }
+      const def = BUILDINGS[buildType];
+      const costStr = Object.entries(def.cost).filter(([, v]) => v > 0).map(([k, v]) => `${ICONS[k] ?? k}-${v}`).join(' ');
+      printLine(chalk.green(`${def.icon} Built ${def.label} in ${buildTerr.name}! (${costStr})`));
       break;
     }
 

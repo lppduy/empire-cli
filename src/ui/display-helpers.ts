@@ -2,6 +2,7 @@
 import chalk from 'chalk';
 import type { GameState } from '../game-types.js';
 import { findArmyInTerritory } from '../engine/army-manager.js';
+import { BUILDINGS } from '../engine/building-manager.js';
 
 export const ICONS: Record<string, string> = {
   city: '🏰', forest: '🌲', mountain: '⛰️ ', plains: '🌾',
@@ -36,6 +37,7 @@ export function printHelp(): void {
   printLine('  move <from> <to> [n]        — move n units between territories (all if omitted)');
   printLine('  recruit <territory> <n>     — recruit n units (3💰 + 2🍖 each)');
   printLine('  attack <from> <to>          — attack enemy territory from yours');
+  printLine('  build <territory> <type>    — build walls/barracks/market (🪵🪨)');
   printLine('  next                        — end turn (enemies act after this)');
   printLine('  save [slot]                 — save game');
   printLine('  quit                        — exit game');
@@ -54,7 +56,8 @@ export function printMap(state: GameState): void {
     const icon = ICONS[t.type] ?? '?';
     const armies = t.armies > 0 ? ` ${ICONS.army} ${t.armies}` : '';
     const yours = t.owner === playerId ? chalk.green(' ★') : '';
-    printLine(`  ${icon} ${colorFn(t.name.padEnd(14))} ${colorFn(ownerName)}${armies}${yours}`);
+    const bldgs = (t.buildings ?? []).map((b) => BUILDINGS[b]?.icon ?? '').join('');
+    printLine(`  ${icon} ${colorFn(t.name.padEnd(14))} ${colorFn(ownerName)}${armies}${yours}${bldgs ? ' ' + bldgs : ''}`);
     const adjNames = t.adjacentTo.map((id) => state.territories.get(id)?.name ?? id).join(', ');
     printLine(chalk.gray(`     ↔ ${adjNames}`));
   }
@@ -77,6 +80,8 @@ export function printTerritoryInfo(state: GameState, territoryName: string): voi
   printLine(`  Owner: ${ownerFaction?.name ?? 'Unclaimed'}`);
   printLine(`  ${ICONS.army} Armies: ${t.armies}`);
   printLine(`  Resources/turn: ${ICONS.gold}${t.resources.gold} ${ICONS.food}${t.resources.food} ${ICONS.wood}${t.resources.wood} ${ICONS.stone}${t.resources.stone}`);
+  const bldgs = (t.buildings ?? []).map((b) => `${BUILDINGS[b]?.icon ?? ''} ${BUILDINGS[b]?.label ?? b}`).join(', ');
+  printLine(`  Buildings: ${bldgs || 'none'}`);
   printLine(`  Neighbors:`);
   for (const adjId of t.adjacentTo) {
     const adj = state.territories.get(adjId)!;

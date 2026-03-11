@@ -19,6 +19,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 3,
     resources: { gold: 4, food: 2, wood: 1, stone: 2 },
     adjacentTo: ['iron_hills', 'greenwood'],
+    buildings: [],
   },
   {
     id: 'iron_hills',
@@ -28,6 +29,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 2,
     resources: { gold: 2, food: 1, wood: 0, stone: 4 },
     adjacentTo: ['northkeep', 'crossroads'],
+    buildings: [],
   },
   {
     id: 'greenwood',
@@ -37,6 +39,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 2,
     resources: { gold: 1, food: 3, wood: 4, stone: 0 },
     adjacentTo: ['northkeep', 'crossroads', 'silver_bay'],
+    buildings: [],
   },
   {
     id: 'crossroads',
@@ -46,6 +49,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 0,
     resources: { gold: 2, food: 2, wood: 1, stone: 1 },
     adjacentTo: ['iron_hills', 'greenwood', 'desert_gate', 'stonehaven'],
+    buildings: [],
   },
   {
     id: 'desert_gate',
@@ -55,6 +59,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 2,
     resources: { gold: 3, food: 1, wood: 0, stone: 2 },
     adjacentTo: ['crossroads'],
+    buildings: [],
   },
   {
     id: 'silver_bay',
@@ -64,6 +69,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 3,
     resources: { gold: 5, food: 2, wood: 1, stone: 1 },
     adjacentTo: ['greenwood', 'stonehaven'],
+    buildings: [],
   },
   {
     id: 'stonehaven',
@@ -73,6 +79,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 2,
     resources: { gold: 2, food: 1, wood: 0, stone: 5 },
     adjacentTo: ['crossroads', 'silver_bay', 'dragon_peak'],
+    buildings: [],
   },
   {
     id: 'dragon_peak',
@@ -82,6 +89,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     armies: 4,
     resources: { gold: 1, food: 0, wood: 0, stone: 6 },
     adjacentTo: ['stonehaven'],
+    buildings: [],
   },
 ];
 

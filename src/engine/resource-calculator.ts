@@ -1,6 +1,7 @@
 // Resource collection and upkeep calculations for each faction per turn
 
 import type { Faction, Territory, Resources } from '../game-types.js';
+import { getMarketGoldBonus } from './building-manager.js';
 
 const ARMY_FOOD_UPKEEP = 1; // food per army unit per turn
 const ARMY_GOLD_UPKEEP = 0; // gold per army unit (free for now)
@@ -18,7 +19,7 @@ export function collectResources(
     const territory = territories.get(territoryId);
     if (!territory) continue;
 
-    income.gold += territory.resources.gold;
+    income.gold += territory.resources.gold + getMarketGoldBonus(territory);
     income.food += territory.resources.food;
     income.wood += territory.resources.wood;
     income.stone += territory.resources.stone;

@@ -46,7 +46,7 @@ export function runAiTurns(state: GameState): string[] {
         if (attackerUnits < 2) continue;
         if (attackerUnits < defenderUnits && faction.personality !== 'aggressive') continue;
 
-        const result = resolveCombat(attackerUnits, 80, defenderUnits, 80, adj.type);
+        const result = resolveCombat(attackerUnits, 80, defenderUnits, 80, adj.type, adj);
         log.push(`${faction.name} attacks ${adj.name} from ${territory.name}!`);
 
         const attackerArmy = findArmyInTerritory(faction.id, territoryId, state.armies);

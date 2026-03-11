@@ -70,6 +70,10 @@ export function toSaveData(state: GameState): SaveData {
  * Deserialize SaveData back into a live GameState.
  */
 export function fromSaveData(data: SaveData): GameState {
+  // Backfill buildings for old saves
+  for (const t of Object.values(data.territories)) {
+    if (!t.buildings) (t as any).buildings = [];
+  }
   return {
     turn: data.turn,
     territories: new Map(Object.entries(data.territories)),

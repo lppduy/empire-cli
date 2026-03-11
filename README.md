@@ -34,8 +34,9 @@ npm start
 3. "info northkeep" — inspect a territory
 4. "recruit northkeep 3" — train 3 units (costs 3💰 + 2🍖 each)
 5. "move northkeep greenwood 3" — march 3 units to Greenwood
-6. "attack greenwood silver" — attack Silver Bay from Greenwood
-7. "next" — end your turn (or use all 3 actions, auto-advances)
+6. "build northkeep walls" — build walls for defense (costs 🪵🪨)
+7. "attack greenwood silver" — attack Silver Bay from Greenwood
+8. "next" — end your turn (or use all 3 actions, auto-advances)
 8. Watch enemy factions react — then plan your next move!
 ```
 
@@ -53,6 +54,7 @@ You get **3 actions per turn**. `look`, `info`, `status`, `help`, `save` are fre
 | `move <from> <to> [n]` | Move n units between territories (all if omitted) |
 | `recruit <territory> <n>` | Recruit n units at a territory |
 | `attack <from> <to>` | Attack enemy territory from yours |
+| `build <territory> <type>` | Build walls/barracks/market |
 | `next` | End turn early |
 | `save [slot]` | Save game |
 | `help` | Show commands |
@@ -71,8 +73,16 @@ You get **3 actions per turn**. `look`, `info`, `status`, `help`, `save` are fre
 
 - 💰 **Gold** — Recruit armies (3 per unit)
 - 🍖 **Food** — Recruit + army upkeep (2 per unit)
-- 🪵 **Wood** — Future: buildings
-- 🪨 **Stone** — Future: fortifications
+- 🪵 **Wood** — Build structures
+- 🪨 **Stone** — Build structures
+
+## Buildings
+
+| Building | Cost | Effect |
+|----------|------|--------|
+| 🧱 Walls | 10🪵 15🪨 | +0.3 defense bonus |
+| 🏛️ Barracks | 8🪵 5🪨 | Recruit costs 2💰 instead of 3💰 |
+| 🏪 Market | 10💰 5🪵 3🪨 | +2💰 income per turn |
 
 ## Roadmap
 
@@ -84,7 +94,7 @@ You get **3 actions per turn**. `look`, `info`, `status`, `help`, `save` are fre
 - [x] Action limit per turn (3 actions)
 - [ ] AI Game Master (Gemini free tier / Ollama / Claude) — dynamic narration
 - [ ] Diplomacy system (alliances, trade, peace)
-- [ ] Buildings (walls, barracks, markets)
+- [x] Buildings (walls, barracks, markets)
 - [ ] More maps & factions
 - [x] npm package (`npx empire-cli`) [![npm](https://img.shields.io/npm/v/empire-cli)](https://www.npmjs.com/package/empire-cli)
 

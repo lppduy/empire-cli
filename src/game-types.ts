@@ -2,6 +2,8 @@
 
 export type TerritoryType = 'plains' | 'forest' | 'mountain' | 'city';
 
+export type BuildingType = 'walls' | 'barracks' | 'market';
+
 export type FactionPersonality = 'aggressive' | 'defensive' | 'diplomatic' | 'mercantile';
 
 export interface Resources {
@@ -19,6 +21,7 @@ export interface Territory {
   armies: number;
   resources: Resources; // base income per turn
   adjacentTo: string[]; // territory ids
+  buildings: BuildingType[]; // built structures
 }
 
 export interface Faction {

@@ -2,8 +2,9 @@
 
 import type { Army, Faction, Territory, GameState } from '../game-types.js';
 import { canAfford, deductResources } from './resource-calculator.js';
+import { getRecruitGoldCost } from './building-manager.js';
 
-const RECRUIT_COST_PER_UNIT = { gold: 3, food: 2, wood: 0, stone: 0 };
+const RECRUIT_FOOD_PER_UNIT = 2;
 const DEFAULT_MORALE = 80;
 
 let armyIdCounter = 1;
@@ -29,9 +30,10 @@ export function recruitArmy(
     return 'Must recruit at least 1 unit.';
   }
 
+  const goldPerUnit = getRecruitGoldCost(territory);
   const totalCost = {
-    gold: RECRUIT_COST_PER_UNIT.gold * units,
-    food: RECRUIT_COST_PER_UNIT.food * units,
+    gold: goldPerUnit * units,
+    food: RECRUIT_FOOD_PER_UNIT * units,
   };
 
   if (!canAfford(faction, totalCost)) {

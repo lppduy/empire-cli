@@ -1,6 +1,7 @@
 // Combat resolution engine: calculates battle outcomes based on units, morale, terrain
 
-import type { CombatResult, TerritoryType } from '../game-types.js';
+import type { CombatResult, TerritoryType, Territory } from '../game-types.js';
+import { getBuildingDefenseBonus } from './building-manager.js';
 
 // Terrain defense bonuses (multiplier on defender power)
 const TERRAIN_BONUS: Record<TerritoryType, number> = {
@@ -19,16 +20,20 @@ export function resolveCombat(
   attackerMorale: number,
   defenderUnits: number,
   defenderMorale: number,
-  terrain: TerritoryType
+  terrain: TerritoryType,
+  defenderTerritory?: Territory
 ): CombatResult {
   const log: string[] = [];
 
   const terrainBonus = TERRAIN_BONUS[terrain];
+  const wallBonus = defenderTerritory ? getBuildingDefenseBonus(defenderTerritory) : 0;
+  const totalDefBonus = terrainBonus + wallBonus;
   const attackPower = attackerUnits * (attackerMorale / 100);
-  const defensePower = defenderUnits * (defenderMorale / 100) * terrainBonus;
+  const defensePower = defenderUnits * (defenderMorale / 100) * totalDefBonus;
 
   log.push(`Attack power: ${attackPower.toFixed(1)} vs Defense power: ${defensePower.toFixed(1)}`);
   log.push(`Terrain (${terrain}) gives defender x${terrainBonus} bonus`);
+  if (wallBonus > 0) log.push(`Walls give defender +${wallBonus} bonus`);
 
   const ratio = attackPower / (defensePower || 1);
 
