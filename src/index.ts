@@ -60,9 +60,12 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       const army = findArmyInTerritory(player.id, from.id, state.armies);
       if (!army || army.units === 0) { printLine(chalk.red(`No army in ${from.name}.`)); break; }
 
-      const toMove = unitCount > 0 ? Math.min(unitCount, army.units) : army.units;
+      const MIN_GARRISON = 2;
+      const movable = army.units - MIN_GARRISON;
+      if (movable <= 0) { printLine(chalk.red(`Cannot move — need at least ${MIN_GARRISON} garrison in ${from.name}. (${army.units} units, ${movable} movable)`)); break; }
+      const toMove = unitCount > 0 ? Math.min(unitCount, movable) : movable;
       const remaining = army.units - toMove;
-      if (toMove === 0) { printLine(chalk.red('Must move at least 1 unit.')); break; }
+      if (toMove === 0) { printLine(chalk.red(`No movable units. ${army.units} in ${from.name}, ${MIN_GARRISON} must garrison.`)); break; }
 
       // Update source
       if (remaining > 0) { army.units = remaining; from.armies = remaining; }
@@ -226,6 +229,11 @@ async function runGameLoop(state: GameState): Promise<void> {
     if (winner) {
       state.isOver = true; state.winner = winner;
       printLine(chalk.bold.yellow(`\n  ${ICONS.crown} ${state.factions.get(winner)!.name} has conquered the world! Game over.\n`));
+      printLine('  1. Play Again');
+      printLine('  2. Exit\n');
+      const choice = await ask('  Choose: ');
+      if (choice.trim() === '1') { return mainMenu(); }
+      else { rl.close(); process.exit(0); }
     }
   }
 }
