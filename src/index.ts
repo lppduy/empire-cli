@@ -36,7 +36,6 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
   const player = state.factions.get(state.playerFactionId)!;
 
   switch (cmd) {
-    case 'look':
     case 'map': printSpatialMap(state); break;
     case 'status': printStatus(state); break;
     case 'help': printHelp(); break;

@@ -30,7 +30,7 @@ npm start
 
 ```
 1. Start a new game → pick a faction (e.g. Iron Legion)
-2. "look" — see the world map
+2. "map" — see the world map
 3. "info northkeep" — inspect a territory
 4. "recruit northkeep 3" — train 3 units (costs 3💰 + 2🍖 each)
 5. "move northkeep greenwood 3" — march 3 units to Greenwood
@@ -44,11 +44,11 @@ npm start
 
 ## Commands
 
-You get **3 actions per turn**. `look`, `info`, `status`, `help`, `save` are free (don't cost actions).
+You get **3 actions per turn**. `map`, `info`, `status`, `help`, `save` are free (don't cost actions).
 
 | Command | Description |
 |---------|-------------|
-| `look` | Show world map |
+| `map` | Show world map |
 | `info <territory>` | Show territory details & neighbors |
 | `status` | Show your resources and army count |
 | `move <from> <to> [n]` | Move n units between territories (all if omitted) |

@@ -31,7 +31,7 @@ export function printStatus(state: GameState): void {
 
 export function printHelp(): void {
   printLine(chalk.cyan('\n  Commands:'));
-  printLine('  look / map                  — show world map');
+  printLine('  map                         — show world map');
   printLine('  info <territory>            — show territory details');
   printLine('  status                      — show your resources');
   printLine('  move <from> <to> [n]        — move n units between territories (all if omitted)');
