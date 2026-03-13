@@ -14,7 +14,7 @@ import type { BuildingType } from './game-types.js';
 import { printLine, printSeparator, printStatus, printHelp, printSpatialMap, printTerritoryInfo, ICONS } from './ui/display-helpers.js';
 import { runAiTurns } from './engine/ai-turn-processor.js';
 import * as narrator from './ai/narrator.js';
-import { loadConfig, saveConfig, getOrSetupNarrator } from './ai/narrator-config.js';
+import { loadConfig, saveConfig, setupNarrator, getOrSetupNarrator } from './ai/narrator-config.js';
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 function ask(prompt: string): Promise<string> {
@@ -318,7 +318,7 @@ async function mainMenu(): Promise<void> {
     return mainMenu();
   }
   if (choice.trim() === '4') {
-    const cfg = await getOrSetupNarrator(ask);
+    const cfg = await setupNarrator(ask);
     saveConfig({ narrator: cfg });
     narrator.init(cfg);
     return mainMenu();
