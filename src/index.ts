@@ -13,6 +13,8 @@ import { buildStructure, BUILDINGS, getRecruitGoldCost } from './engine/building
 import type { BuildingType } from './game-types.js';
 import { printLine, printSeparator, printStatus, printHelp, printSpatialMap, printTerritoryInfo, ICONS } from './ui/display-helpers.js';
 import { runAiTurns } from './engine/ai-turn-processor.js';
+import * as narrator from './ai/narrator.js';
+import { loadConfig, saveConfig, getOrSetupNarrator } from './ai/narrator-config.js';
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 function ask(prompt: string): Promise<string> {
@@ -118,6 +120,9 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       const result = resolveCombat(attackerArmy.units, attackerArmy.morale, to.armies, 80, to.type, to);
       result.log.forEach((l) => printLine(`  ${l}`));
 
+      const defenderFaction = to.owner ? state.factions.get(to.owner)?.name ?? 'Unknown' : 'Unclaimed';
+      const preAttackUnits = attackerArmy.units;
+      const preDefenderUnits = to.armies;
       applyCasualties(attackerArmy, result.attackerCasualties, player, state.armies, from);
       if (result.captured) {
         const oldOwner = to.owner ? state.factions.get(to.owner) : null;
@@ -127,7 +132,6 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
           oldOwner.territories = oldOwner.territories.filter((id) => id !== to.id);
         }
         to.owner = player.id;
-        // Move surviving attackers to captured territory
         const survivingUnits = attackerArmy?.units ?? 0;
         from.armies -= survivingUnits;
         to.armies = survivingUnits;
@@ -138,6 +142,15 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       } else {
         printLine(chalk.red(`\n  ${ICONS.skull} The attack failed.`));
       }
+      // AI narrator: battle narration
+      const battleNarration = await narrator.narrateBattle({
+        attackerFaction: player.name, defenderFaction,
+        fromTerritory: from.name, toTerritory: to.name, terrainType: to.type,
+        attackerUnits: preAttackUnits, defenderUnits: preDefenderUnits,
+        captured: result.captured, attackerCasualties: result.attackerCasualties,
+        defenderCasualties: result.defenderCasualties,
+      });
+      if (battleNarration) printLine(chalk.italic.magenta(`\n  📜 ${battleNarration}`));
       break;
     }
 
@@ -204,7 +217,7 @@ async function runGameLoop(state: GameState): Promise<void> {
   printHelp();
 
   const MAX_ACTIONS = 3; // actions per turn (look/info/status/help don't count)
-  const FREE_CMDS = new Set(['look', 'map', 'info', 'status', 'help', 'where', 'save']);
+  const FREE_CMDS = new Set(['map', 'info', 'status', 'help', 'save']);
 
   while (!state.isOver) {
     printStatus(state);
@@ -253,6 +266,17 @@ async function runGameLoop(state: GameState): Promise<void> {
     }
 
     [...resLogs, ...aiLogs].forEach((l) => state.gameLog.push(l));
+
+    // AI narrator: turn summary
+    const pFaction = state.factions.get(state.playerFactionId)!;
+    const turnNarration = await narrator.narrateTurnEnd({
+      playerFaction: pFaction.name, turn: state.turn,
+      territoriesOwned: pFaction.territories.length,
+      totalTerritories: state.territories.size,
+      enemyActions: aiLogs,
+    });
+    if (turnNarration) printLine(chalk.italic.magenta(`\n  📜 ${turnNarration}`));
+
     printLine(''); printSeparator();
     state.turn++;
 
@@ -260,6 +284,13 @@ async function runGameLoop(state: GameState): Promise<void> {
     if (winner) {
       state.isOver = true; state.winner = winner;
       printLine(chalk.bold.yellow(`\n  ${ICONS.crown} ${state.factions.get(winner)!.name} has conquered the world! Game over.\n`));
+      // AI narrator: game over
+      const endNarration = await narrator.narrateGameOver({
+        winnerFaction: state.factions.get(winner)!.name,
+        playerFaction: state.factions.get(state.playerFactionId)!.name,
+        turn: state.turn, isPlayerWinner: winner === state.playerFactionId,
+      });
+      if (endNarration) printLine(chalk.italic.magenta(`  📜 ${endNarration}\n`));
       printLine('  1. Play Again');
       printLine('  2. Exit\n');
       const choice = await ask('  Choose: ');
@@ -278,14 +309,21 @@ async function mainMenu(): Promise<void> {
   printLine('  1. New Game');
   printLine('  2. Load Game');
   printLine('  3. Tutorial');
-  printLine('  4. Quit\n');
+  printLine('  4. Narrator Settings');
+  printLine('  5. Quit\n');
 
   const choice = await ask('  Choose: ');
   if (choice.trim() === '3') {
     await showTutorial();
     return mainMenu();
   }
-  if (choice.trim() === '4') { rl.close(); process.exit(0); }
+  if (choice.trim() === '4') {
+    const cfg = await getOrSetupNarrator(ask);
+    saveConfig({ narrator: cfg });
+    narrator.init(cfg);
+    return mainMenu();
+  }
+  if (choice.trim() === '5') { rl.close(); process.exit(0); }
   if (choice.trim() === '1') {
     printLine('\nChoose your faction:');
     printLine('  1. 🔴 Iron Legion (aggressive)');
@@ -294,6 +332,9 @@ async function mainMenu(): Promise<void> {
     printLine('  4. 🟣 Void Covenant (diplomatic)\n');
     const fc = await ask('  Choose: ');
     const fm: Record<string, string> = { '1': 'iron_legion', '2': 'green_pact', '3': 'sand_empire', '4': 'void_covenant' };
+    // Init narrator from saved config
+    const appConfig = loadConfig();
+    narrator.init(appConfig.narrator);
     await runGameLoop(newGame(fm[fc.trim()] ?? 'iron_legion'));
   } else if (choice.trim() === '2') {
     const saves = listSaves();
@@ -302,6 +343,8 @@ async function mainMenu(): Promise<void> {
     const slot = await ask('  Slot name: ');
     const state = loadGame(slot.trim());
     if (!state) { printLine(chalk.red('Save not found.')); return mainMenu(); }
+    const appConfig2 = loadConfig();
+    narrator.init(appConfig2.narrator);
     await runGameLoop(state);
   } else { rl.close(); process.exit(0); }
 }
@@ -324,7 +367,7 @@ async function showTutorial(): Promise<void> {
       '    • attack  — invade enemy territory',
       '    • build   — construct buildings',
       '',
-      '  Free commands (unlimited): look, info, status, help, save',
+      '  Free commands (unlimited): map, info, status, help, save',
       '  Type "next" to end your turn early.',
     ],
     // Page 2: Economy & Resources
