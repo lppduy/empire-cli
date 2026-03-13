@@ -148,6 +148,13 @@ export function printSpatialMap(state: GameState): void {
   }).join('  ');
   printLine(`  ${legend}`);
   printLine('');
+  // Adjacency list
+  printLine(chalk.gray('  Connections:'));
+  for (const t of state.territories.values()) {
+    const neighbors = t.adjacentTo.map((id) => state.territories.get(id)?.name ?? id).join(', ');
+    printLine(chalk.gray(`  ${t.name} ↔ ${neighbors}`));
+  }
+  printLine('');
 }
 
 // Show detailed info about a specific territory
