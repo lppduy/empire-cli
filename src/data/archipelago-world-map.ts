@@ -1,13 +1,15 @@
-// Archipelago world map: "The Shattered Isles" — 10 territories, 4 factions
+// Archipelago world map: "The Shattered Isles" — 14 territories, 6 factions
 // A chain of islands connected by bridges and shallow waters
 // Map layout:
-//   [Coral Haven] --- [Tidecrest]
+//   [Coral Haven] --- [Tidecrest] --- [Whale Rock]
 //        |                |
 //   [Stormwatch] --- [Pearl Shoals] --- [Ember Isle]
 //        |                |                |
 //   [Driftwood]      [Serpent Bay] --- [Obsidian Rock]
+//        |                |                |
+//   [Kelp Forest]    [Fog Marsh] --- [Skyspire]
 //                         |
-//                    [Fog Marsh] --- [Skyspire]
+//                    [Sunken Ruins] --- [Leviathan Cove]
 
 import type { Territory, Faction, WorldMap } from '../game-types.js';
 
@@ -29,7 +31,17 @@ const TERRITORIES: Territory[] = [
     owner: 'tide_lords',
     armies: 2,
     resources: { gold: 2, food: 3, wood: 2, stone: 1 },
-    adjacentTo: ['coral_haven', 'pearl_shoals'],
+    adjacentTo: ['coral_haven', 'pearl_shoals', 'whale_rock'],
+    buildings: [],
+  },
+  {
+    id: 'whale_rock',
+    name: 'Whale Rock',
+    type: 'mountain',
+    owner: 'deep_ones',
+    armies: 3,
+    resources: { gold: 2, food: 2, wood: 0, stone: 4 },
+    adjacentTo: ['tidecrest'],
     buildings: [],
   },
   {
@@ -69,7 +81,7 @@ const TERRITORIES: Territory[] = [
     owner: 'storm_kin',
     armies: 2,
     resources: { gold: 1, food: 2, wood: 5, stone: 0 },
-    adjacentTo: ['stormwatch'],
+    adjacentTo: ['stormwatch', 'kelp_forest'],
     buildings: [],
   },
   {
@@ -89,7 +101,17 @@ const TERRITORIES: Territory[] = [
     owner: 'flame_brood',
     armies: 2,
     resources: { gold: 1, food: 0, wood: 0, stone: 5 },
-    adjacentTo: ['ember_isle', 'serpent_bay'],
+    adjacentTo: ['ember_isle', 'serpent_bay', 'skyspire'],
+    buildings: [],
+  },
+  {
+    id: 'kelp_forest',
+    name: 'Kelp Forest',
+    type: 'forest',
+    owner: 'deep_ones',
+    armies: 2,
+    resources: { gold: 1, food: 4, wood: 3, stone: 0 },
+    adjacentTo: ['driftwood'],
     buildings: [],
   },
   {
@@ -99,7 +121,7 @@ const TERRITORIES: Territory[] = [
     owner: 'mist_walkers',
     armies: 3,
     resources: { gold: 2, food: 4, wood: 3, stone: 0 },
-    adjacentTo: ['serpent_bay', 'skyspire'],
+    adjacentTo: ['serpent_bay', 'skyspire', 'sunken_ruins'],
     buildings: [],
   },
   {
@@ -109,7 +131,27 @@ const TERRITORIES: Territory[] = [
     owner: 'mist_walkers',
     armies: 2,
     resources: { gold: 3, food: 1, wood: 0, stone: 4 },
-    adjacentTo: ['fog_marsh'],
+    adjacentTo: ['obsidian_rock', 'fog_marsh'],
+    buildings: [],
+  },
+  {
+    id: 'sunken_ruins',
+    name: 'Sunken Ruins',
+    type: 'city',
+    owner: 'wraith_fleet',
+    armies: 3,
+    resources: { gold: 4, food: 1, wood: 1, stone: 3 },
+    adjacentTo: ['fog_marsh', 'leviathan_cove'],
+    buildings: [],
+  },
+  {
+    id: 'leviathan_cove',
+    name: 'Leviathan Cove',
+    type: 'plains',
+    owner: 'wraith_fleet',
+    armies: 2,
+    resources: { gold: 2, food: 3, wood: 2, stone: 1 },
+    adjacentTo: ['sunken_ruins'],
     buildings: [],
   },
 ];
@@ -121,10 +163,7 @@ const FACTIONS: Faction[] = [
     personality: 'mercantile',
     color: 'cyan',
     territories: ['coral_haven', 'tidecrest'],
-    gold: 25,
-    food: 15,
-    wood: 8,
-    stone: 5,
+    gold: 25, food: 15, wood: 8, stone: 5,
     totalArmies: 5,
   },
   {
@@ -133,10 +172,7 @@ const FACTIONS: Faction[] = [
     personality: 'aggressive',
     color: 'blue',
     territories: ['stormwatch', 'driftwood'],
-    gold: 15,
-    food: 10,
-    wood: 20,
-    stone: 15,
+    gold: 15, food: 10, wood: 20, stone: 15,
     totalArmies: 5,
   },
   {
@@ -145,10 +181,7 @@ const FACTIONS: Faction[] = [
     personality: 'aggressive',
     color: 'red',
     territories: ['ember_isle', 'obsidian_rock'],
-    gold: 12,
-    food: 5,
-    wood: 2,
-    stone: 25,
+    gold: 12, food: 5, wood: 2, stone: 25,
     totalArmies: 5,
   },
   {
@@ -157,28 +190,45 @@ const FACTIONS: Faction[] = [
     personality: 'diplomatic',
     color: 'magenta',
     territories: ['fog_marsh', 'skyspire'],
-    gold: 18,
-    food: 12,
-    wood: 10,
-    stone: 10,
+    gold: 18, food: 12, wood: 10, stone: 10,
+    totalArmies: 5,
+  },
+  {
+    id: 'deep_ones',
+    name: 'Deep Ones',
+    personality: 'defensive',
+    color: 'green',
+    territories: ['whale_rock', 'kelp_forest'],
+    gold: 12, food: 15, wood: 12, stone: 12,
+    totalArmies: 5,
+  },
+  {
+    id: 'wraith_fleet',
+    name: 'Wraith Fleet',
+    personality: 'aggressive',
+    color: 'yellowBright',
+    territories: ['sunken_ruins', 'leviathan_cove'],
+    gold: 20, food: 10, wood: 8, stone: 10,
     totalArmies: 5,
   },
 ];
 
-/** The Shattered Isles — 10 territories, 4 factions, island chain */
+/** The Shattered Isles — 14 territories, 6 factions, island chain */
 export const ARCHIPELAGO_MAP: WorldMap = {
   id: 'archipelago',
   name: 'The Shattered Isles',
-  description: '10 territories, 4 factions — island chain with chokepoints',
+  description: '14 territories, 6 factions — island chain with chokepoints',
   territories: TERRITORIES,
   factions: FACTIONS,
   layoutIds: [
-    ['coral_haven', '────', 'tidecrest'],
+    ['coral_haven', '────', 'tidecrest', '────', 'whale_rock'],
     ['│', '', '│'],
     ['stormwatch', '────', 'pearl_shoals', '────', 'ember_isle'],
     ['│', '', '│', '', '│'],
     ['driftwood', '', 'serpent_bay', '────', 'obsidian_rock'],
+    ['│', '', '│', '', '│'],
+    ['kelp_forest', '', 'fog_marsh', '────', 'skyspire'],
     ['', '', '│'],
-    ['', '', 'fog_marsh', '────', 'skyspire'],
+    ['', '', 'sunken_ruins', '────', 'leviathan_cove'],
   ],
 };

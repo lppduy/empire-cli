@@ -25,7 +25,10 @@ export function printStatus(state: GameState): void {
   const player = state.factions.get(state.playerFactionId)!;
   const colorFn = (chalk as any)[player.color] ?? chalk.white;
   printSeparator();
-  printLine(colorFn(`  ${ICONS.crown} ${player.name}  —  Turn ${state.turn}`));
+  const pid = state.playerIdentity;
+  const displayName = pid?.nationName || player.name;
+  const leaderTag = pid?.leaderName ? ` (${pid.leaderName})` : '';
+  printLine(colorFn(`  ${ICONS.crown} ${displayName}${leaderTag}  —  Turn ${state.turn}`));
   printLine(`  ${ICONS.gold} ${chalk.yellow(player.gold)}  ${ICONS.food} ${chalk.green(player.food)}  ${ICONS.wood} ${chalk.blue(player.wood)}  ${ICONS.stone} ${chalk.gray(player.stone)}`);
   printLine(`  ${ICONS.army} Armies: ${player.totalArmies}  |  ${ICONS.flag} Territories: ${player.territories.length}/${state.territories.size}`);
   // Diplomatic relations summary

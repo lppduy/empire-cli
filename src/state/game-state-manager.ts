@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import type { GameState, SaveData, Army, WorldMap } from '../game-types.js';
+import type { GameState, SaveData, Army, WorldMap, PlayerIdentity } from '../game-types.js';
 import { MAINLAND_MAP } from '../data/default-world-map.js';
 
 const SAVES_DIR = join(homedir(), '.empire-cli', 'saves');
@@ -17,7 +17,17 @@ function ensureSavesDir(): void {
 /**
  * Create a fresh game state from a world map.
  */
-export function newGame(playerFactionId: string, worldMap: WorldMap = MAINLAND_MAP): GameState {
+const DEFAULT_IDENTITY: PlayerIdentity = {
+  leaderName: 'Emperor',
+  nationName: '',
+  slogan: 'Glory awaits!',
+};
+
+export function newGame(
+  playerFactionId: string,
+  worldMap: WorldMap = MAINLAND_MAP,
+  identity?: Partial<PlayerIdentity>,
+): GameState {
   const territories = new Map(worldMap.territories.map((t) => [t.id, { ...t }]));
   const factions = new Map(worldMap.factions.map((f) => [f.id, { ...f, territories: [...f.territories] }]));
 
@@ -37,6 +47,13 @@ export function newGame(playerFactionId: string, worldMap: WorldMap = MAINLAND_M
     }
   }
 
+  const playerFaction = factions.get(playerFactionId)!;
+  const pid: PlayerIdentity = {
+    leaderName: identity?.leaderName || DEFAULT_IDENTITY.leaderName,
+    nationName: identity?.nationName || playerFaction.name,
+    slogan: identity?.slogan || DEFAULT_IDENTITY.slogan,
+  };
+
   return {
     turn: 1,
     mapId: worldMap.id,
@@ -44,8 +61,9 @@ export function newGame(playerFactionId: string, worldMap: WorldMap = MAINLAND_M
     factions,
     armies,
     playerFactionId,
+    playerIdentity: pid,
     diplomacy: [],
-    gameLog: ['A new empire rises. Your destiny awaits.'],
+    gameLog: [`${pid.leaderName} rises to lead ${pid.nationName}. ${pid.slogan}`],
     isOver: false,
     winner: null,
   };
@@ -58,6 +76,7 @@ export function toSaveData(state: GameState): SaveData {
   return {
     turn: state.turn,
     mapId: state.mapId,
+    playerIdentity: state.playerIdentity,
     territories: Object.fromEntries(state.territories),
     factions: Object.fromEntries(state.factions),
     armies: Object.fromEntries(state.armies),
@@ -81,6 +100,7 @@ export function fromSaveData(data: SaveData): GameState {
   return {
     turn: data.turn,
     mapId: data.mapId ?? 'mainland',
+    playerIdentity: data.playerIdentity ?? { leaderName: 'Emperor', nationName: '', slogan: 'Glory awaits!' },
     territories: new Map(Object.entries(data.territories)),
     factions: new Map(Object.entries(data.factions)),
     armies: new Map(Object.entries(data.armies)),

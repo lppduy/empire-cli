@@ -74,6 +74,13 @@ export interface WorldMap {
   layoutIds: string[][];
 }
 
+/** Player customization — leader name, nation label, slogan */
+export interface PlayerIdentity {
+  leaderName: string;
+  nationName: string;
+  slogan: string;
+}
+
 export interface GameState {
   turn: number;
   mapId: string;
@@ -81,6 +88,7 @@ export interface GameState {
   factions: Map<string, Faction>;
   armies: Map<string, Army>;
   playerFactionId: string;
+  playerIdentity: PlayerIdentity;
   gameLog: string[];
   diplomacy: DiplomaticRelation[];
   isOver: boolean;
@@ -96,6 +104,7 @@ export interface Command {
 export interface SaveData {
   turn: number;
   mapId?: string;
+  playerIdentity?: PlayerIdentity;
   territories: Record<string, Territory>;
   factions: Record<string, Faction>;
   armies: Record<string, Army>;

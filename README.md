@@ -40,7 +40,9 @@ npm start
 8. Watch enemy factions react — then plan your next move!
 ```
 
-**Goal:** Conquer all 8 territories to win.
+**Goal:** Conquer all territories to win.
+
+When starting a new game, you pick a map, choose a faction, then customize your leader name, nation name, and slogan (all optional — press Enter to skip).
 
 ## Commands
 
@@ -68,8 +70,8 @@ You get **3 actions per turn**. `map`, `info`, `status`, `help`, `save` are free
 
 | Map | Territories | Factions | Style |
 |-----|------------|----------|-------|
-| The Mainland | 8 | Iron Legion, Green Pact, Sand Empire, Void Covenant | Classic balanced |
-| The Shattered Isles | 10 | Tide Lords, Storm Kin, Flame Brood, Mist Walkers | Island chokepoints |
+| The Mainland | 12 | 6 factions | Classic continental war |
+| The Shattered Isles | 14 | 6 factions | Island chain with chokepoints |
 
 ## Factions
 
@@ -80,7 +82,9 @@ You get **3 actions per turn**. `map`, `info`, `status`, `help`, `save` are free
 | 🔴 Iron Legion | Aggressive | High stone, strong start |
 | 🟢 Green Pact | Defensive | High food & wood |
 | 🟡 Sand Empire | Mercantile | High gold reserves |
-| 🟣 Void Covenant | Diplomatic | Mountain fortress |
+| 🟣 Void Covenant | Diplomatic | Mountain fortress, fertile south |
+| 🔵 Frost Wardens | Defensive | Stone-rich northern highlands |
+| 🔴 Crimson Horde | Aggressive | Scrappy eastern raiders |
 
 **The Shattered Isles:**
 
@@ -90,6 +94,8 @@ You get **3 actions per turn**. `map`, `info`, `status`, `help`, `save` are free
 | 🔵 Storm Kin | Aggressive | High wood & stone, mountain base |
 | 🔴 Flame Brood | Aggressive | Massive stone, volcanic islands |
 | 🟣 Mist Walkers | Diplomatic | Balanced resources, forest cover |
+| 🟢 Deep Ones | Defensive | Forest & mountain, hidden islands |
+| 🟡 Wraith Fleet | Aggressive | Gold-rich, sunken city raiders |
 
 ## Resources
 

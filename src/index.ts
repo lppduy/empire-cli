@@ -279,7 +279,9 @@ function parseTwoTerritories(state: GameState, args: string[]): { from: Territor
 // ─── Game loop ───────────────────────────────────────────────────────────────
 
 async function runGameLoop(state: GameState): Promise<void> {
-  printLine(chalk.bold.cyan(`\n  ${ICONS.crown} Welcome to Empire CLI ${ICONS.army}\n`));
+  const pid = state.playerIdentity;
+  printLine(chalk.bold.cyan(`\n  ${ICONS.crown} Welcome, ${pid.leaderName} of ${pid.nationName} ${ICONS.army}`));
+  printLine(chalk.italic.gray(`  "${pid.slogan}"\n`));
   printHelp();
 
   const MAX_ACTIONS = 3; // actions per turn (look/info/status/help don't count)
@@ -418,10 +420,16 @@ async function mainMenu(): Promise<void> {
     const factionIdx = parseInt(fc.trim(), 10) - 1;
     const selectedFaction = selectedMap.factions[factionIdx] ?? selectedMap.factions[0];
 
+    // Player identity customization
+    printLine(chalk.cyan('\n  Customize your empire (press Enter to skip):'));
+    const leaderName = (await ask('  Your leader name: ')).trim();
+    const nationName = (await ask('  Your nation name: ')).trim();
+    const slogan = (await ask('  Your slogan: ')).trim();
+
     // Init narrator from saved config
     const appConfig = loadConfig();
     narrator.init(appConfig.narrator);
-    await runGameLoop(newGame(selectedFaction.id, selectedMap));
+    await runGameLoop(newGame(selectedFaction.id, selectedMap, { leaderName, nationName, slogan }));
   } else if (choice.trim() === '2') {
     const saves = listSaves();
     if (saves.length === 0) { printLine(chalk.red('No saves found.')); return mainMenu(); }

@@ -1,16 +1,26 @@
-// Default world map: "The Mainland" — 8 territories, 4 factions
+// Default world map: "The Mainland" — 12 territories, 6 factions
 // Map layout:
-//   [Northkeep] --- [Iron Hills]
-//        |              |
-//   [Greenwood] --- [Crossroads] --- [Desert Gate]
-//        |              |
-//   [Silver Bay] --- [Stonehaven]
-//                       |
-//                  [Dragon Peak]
+//   [Frosthold] --- [Northkeep] --- [Iron Hills]
+//        |              |                |
+//   [Whisperfen] -- [Greenwood] --- [Crossroads] --- [Desert Gate]
+//                       |                |                |
+//                  [Silver Bay] --- [Stonehaven] --- [Ashlands]
+//                                       |
+//                                  [Dragon Peak] --- [Sunfield]
 
 import type { Territory, Faction, WorldMap } from '../game-types.js';
 
 export const DEFAULT_TERRITORIES: Territory[] = [
+  {
+    id: 'frosthold',
+    name: 'Frosthold',
+    type: 'mountain',
+    owner: 'frost_wardens',
+    armies: 3,
+    resources: { gold: 1, food: 1, wood: 2, stone: 5 },
+    adjacentTo: ['northkeep', 'whisperfen'],
+    buildings: [],
+  },
   {
     id: 'northkeep',
     name: 'Northkeep',
@@ -18,7 +28,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     owner: 'iron_legion',
     armies: 3,
     resources: { gold: 4, food: 2, wood: 1, stone: 2 },
-    adjacentTo: ['iron_hills', 'greenwood'],
+    adjacentTo: ['frosthold', 'iron_hills', 'greenwood'],
     buildings: [],
   },
   {
@@ -32,13 +42,23 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     buildings: [],
   },
   {
+    id: 'whisperfen',
+    name: 'Whisperfen',
+    type: 'forest',
+    owner: 'frost_wardens',
+    armies: 2,
+    resources: { gold: 1, food: 3, wood: 4, stone: 0 },
+    adjacentTo: ['frosthold', 'greenwood'],
+    buildings: [],
+  },
+  {
     id: 'greenwood',
     name: 'Greenwood',
     type: 'forest',
     owner: 'green_pact',
     armies: 2,
     resources: { gold: 1, food: 3, wood: 4, stone: 0 },
-    adjacentTo: ['northkeep', 'crossroads', 'silver_bay'],
+    adjacentTo: ['northkeep', 'whisperfen', 'crossroads', 'silver_bay'],
     buildings: [],
   },
   {
@@ -58,7 +78,7 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     owner: 'sand_empire',
     armies: 2,
     resources: { gold: 3, food: 1, wood: 0, stone: 2 },
-    adjacentTo: ['crossroads'],
+    adjacentTo: ['crossroads', 'ashlands'],
     buildings: [],
   },
   {
@@ -78,7 +98,17 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     owner: 'sand_empire',
     armies: 2,
     resources: { gold: 2, food: 1, wood: 0, stone: 5 },
-    adjacentTo: ['crossroads', 'silver_bay', 'dragon_peak'],
+    adjacentTo: ['crossroads', 'silver_bay', 'dragon_peak', 'ashlands'],
+    buildings: [],
+  },
+  {
+    id: 'ashlands',
+    name: 'Ashlands',
+    type: 'plains',
+    owner: 'crimson_horde',
+    armies: 3,
+    resources: { gold: 2, food: 2, wood: 1, stone: 3 },
+    adjacentTo: ['desert_gate', 'stonehaven'],
     buildings: [],
   },
   {
@@ -88,7 +118,17 @@ export const DEFAULT_TERRITORIES: Territory[] = [
     owner: 'void_covenant',
     armies: 4,
     resources: { gold: 1, food: 0, wood: 0, stone: 6 },
-    adjacentTo: ['stonehaven'],
+    adjacentTo: ['stonehaven', 'sunfield'],
+    buildings: [],
+  },
+  {
+    id: 'sunfield',
+    name: 'Sunfield',
+    type: 'plains',
+    owner: 'void_covenant',
+    armies: 2,
+    resources: { gold: 3, food: 4, wood: 1, stone: 0 },
+    adjacentTo: ['dragon_peak'],
     buildings: [],
   },
 ];
@@ -100,10 +140,7 @@ export const DEFAULT_FACTIONS: Faction[] = [
     personality: 'aggressive',
     color: 'red',
     territories: ['northkeep', 'iron_hills'],
-    gold: 20,
-    food: 10,
-    wood: 5,
-    stone: 15,
+    gold: 20, food: 10, wood: 5, stone: 15,
     totalArmies: 5,
   },
   {
@@ -112,10 +149,7 @@ export const DEFAULT_FACTIONS: Faction[] = [
     personality: 'defensive',
     color: 'green',
     territories: ['greenwood', 'silver_bay'],
-    gold: 15,
-    food: 20,
-    wood: 25,
-    stone: 5,
+    gold: 15, food: 20, wood: 25, stone: 5,
     totalArmies: 5,
   },
   {
@@ -124,10 +158,7 @@ export const DEFAULT_FACTIONS: Faction[] = [
     personality: 'mercantile',
     color: 'yellow',
     territories: ['desert_gate', 'stonehaven'],
-    gold: 30,
-    food: 8,
-    wood: 2,
-    stone: 10,
+    gold: 30, food: 8, wood: 2, stone: 10,
     totalArmies: 4,
   },
   {
@@ -135,29 +166,44 @@ export const DEFAULT_FACTIONS: Faction[] = [
     name: 'Void Covenant',
     personality: 'diplomatic',
     color: 'magenta',
-    territories: ['dragon_peak'],
-    gold: 10,
-    food: 5,
-    wood: 2,
-    stone: 20,
-    totalArmies: 4,
+    territories: ['dragon_peak', 'sunfield'],
+    gold: 10, food: 5, wood: 2, stone: 20,
+    totalArmies: 6,
+  },
+  {
+    id: 'frost_wardens',
+    name: 'Frost Wardens',
+    personality: 'defensive',
+    color: 'cyan',
+    territories: ['frosthold', 'whisperfen'],
+    gold: 10, food: 12, wood: 15, stone: 18,
+    totalArmies: 5,
+  },
+  {
+    id: 'crimson_horde',
+    name: 'Crimson Horde',
+    personality: 'aggressive',
+    color: 'redBright',
+    territories: ['ashlands'],
+    gold: 15, food: 10, wood: 5, stone: 12,
+    totalArmies: 3,
   },
 ];
 
-/** The Mainland — default 8-territory map */
+/** The Mainland — 12 territories, 6 factions */
 export const MAINLAND_MAP: WorldMap = {
   id: 'mainland',
   name: 'The Mainland',
-  description: '8 territories, 4 factions — classic balanced map',
+  description: '12 territories, 6 factions — classic continental war',
   territories: DEFAULT_TERRITORIES,
   factions: DEFAULT_FACTIONS,
   layoutIds: [
-    ['northkeep', '────', 'iron_hills'],
-    ['│', '', '│'],
-    ['greenwood', '────', 'crossroads', '────', 'desert_gate'],
-    ['│', '', '│'],
-    ['silver_bay', '────', 'stonehaven'],
-    ['', '', '│'],
-    ['', '', 'dragon_peak'],
+    ['frosthold', '────', 'northkeep', '────', 'iron_hills'],
+    ['│', '', '│', '', '│'],
+    ['whisperfen', '────', 'greenwood', '────', 'crossroads', '────', 'desert_gate'],
+    ['', '', '│', '', '│', '', '│'],
+    ['', '', 'silver_bay', '────', 'stonehaven', '────', 'ashlands'],
+    ['', '', '', '', '│'],
+    ['', '', '', '', 'dragon_peak', '────', 'sunfield'],
   ],
 };
