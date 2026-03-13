@@ -13,6 +13,7 @@ import { buildStructure, BUILDINGS, getRecruitGoldCost } from './engine/building
 import type { BuildingType } from './game-types.js';
 import { printLine, printSeparator, printStatus, printHelp, printSpatialMap, printTerritoryInfo, ICONS } from './ui/display-helpers.js';
 import { runAiTurns } from './engine/ai-turn-processor.js';
+import { proposeAlliance, proposePeace, proposeTrade, getDiplomaticStatus, getFactionRelations, tickDiplomacy } from './engine/diplomacy-manager.js';
 import * as narrator from './ai/narrator.js';
 import { loadConfig, saveConfig, setupNarrator, getOrSetupNarrator } from './ai/narrator-config.js';
 
@@ -26,6 +27,12 @@ function ask(prompt: string): Promise<string> {
 function findTerritory(state: GameState, name: string): Territory | undefined {
   return [...state.territories.values()].find(
     (t) => t.name.toLowerCase().includes(name.toLowerCase())
+  );
+}
+
+function findFaction(state: GameState, name: string): Faction | undefined {
+  return [...state.factions.values()].find(
+    (f) => f.name.toLowerCase().includes(name.toLowerCase()) && f.id !== state.playerFactionId
   );
 }
 
@@ -178,6 +185,64 @@ async function processCommand(input: string, state: GameState): Promise<boolean>
       break;
     }
 
+    case 'ally': {
+      if (!args[0]) { printLine('Usage: ally <faction>'); break; }
+      const allyTarget = findFaction(state, args.join(' '));
+      if (!allyTarget) { printLine(chalk.red('Faction not found.')); break; }
+      if (allyTarget.territories.length === 0) { printLine(chalk.red(`${allyTarget.name} is eliminated.`)); break; }
+      const allyResult = proposeAlliance(state, player.id, allyTarget.id);
+      printLine(allyResult.accepted ? chalk.green(`  🕊️  ${allyResult.reason}`) : chalk.yellow(`  ${allyResult.reason}`));
+      break;
+    }
+
+    case 'peace': {
+      if (!args[0]) { printLine('Usage: peace <faction>'); break; }
+      const peaceTarget = findFaction(state, args.join(' '));
+      if (!peaceTarget) { printLine(chalk.red('Faction not found.')); break; }
+      if (peaceTarget.territories.length === 0) { printLine(chalk.red(`${peaceTarget.name} is eliminated.`)); break; }
+      const peaceResult = proposePeace(state, player.id, peaceTarget.id);
+      printLine(peaceResult.accepted ? chalk.green(`  🕊️  ${peaceResult.reason}`) : chalk.yellow(`  ${peaceResult.reason}`));
+      break;
+    }
+
+    case 'trade': {
+      // trade <faction> <n> <resource> for <resource>
+      if (args.length < 5) { printLine('Usage: trade <faction> <n> <resource> for <resource>'); break; }
+      const forIdx = args.indexOf('for');
+      if (forIdx < 3) { printLine('Usage: trade <faction> <n> <resource> for <resource>'); break; }
+      const tradeFactionName = args.slice(0, forIdx - 2).join(' ');
+      const tradeAmount = parseInt(args[forIdx - 2], 10);
+      const giveRes = args[forIdx - 1].toLowerCase();
+      const getRes = args[forIdx + 1]?.toLowerCase();
+      if (!tradeAmount || tradeAmount < 1 || !getRes) { printLine('Usage: trade <faction> <n> <resource> for <resource>'); break; }
+      const tradeFaction = findFaction(state, tradeFactionName);
+      if (!tradeFaction) { printLine(chalk.red('Faction not found.')); break; }
+      if (!['gold', 'food', 'wood', 'stone'].includes(giveRes) || !['gold', 'food', 'wood', 'stone'].includes(getRes)) {
+        printLine(chalk.red('Resources: gold, food, wood, stone')); break;
+      }
+      if ((player as any)[giveRes] < tradeAmount) { printLine(chalk.red(`Not enough ${giveRes}.`)); break; }
+      const tradeResult = proposeTrade(state, player.id, tradeFaction.id, giveRes, tradeAmount, getRes);
+      printLine(tradeResult.accepted ? chalk.green(`  💰 ${tradeResult.reason}`) : chalk.yellow(`  ${tradeResult.reason}`));
+      break;
+    }
+
+    case 'diplo':
+    case 'diplomacy': {
+      const rels = getFactionRelations(state.diplomacy, player.id);
+      if (rels.length === 0) { printLine(chalk.gray('  No diplomatic relations.')); break; }
+      printLine(chalk.cyan('\n  Diplomatic Relations:'));
+      for (const r of rels) {
+        const otherId = r.factionA === player.id ? r.factionB : r.factionA;
+        const other = state.factions.get(otherId);
+        if (!other) continue;
+        const icon = r.status === 'allied' ? '🤝' : r.status === 'peace' ? '🕊️ ' : '⚔️ ';
+        const extra = r.turnsRemaining > 0 ? ` (${r.turnsRemaining} turns)` : '';
+        printLine(`  ${icon} ${other.name}: ${r.status}${extra}`);
+      }
+      printLine('');
+      break;
+    }
+
     case 'save': {
       saveGame(state, args[0] ?? 'autosave');
       printLine(chalk.green(`Game saved to "${args[0] ?? 'autosave'}".`));
@@ -217,7 +282,7 @@ async function runGameLoop(state: GameState): Promise<void> {
   printHelp();
 
   const MAX_ACTIONS = 3; // actions per turn (look/info/status/help don't count)
-  const FREE_CMDS = new Set(['map', 'info', 'status', 'help', 'save']);
+  const FREE_CMDS = new Set(['map', 'info', 'status', 'help', 'save', 'diplo', 'diplomacy']);
 
   while (!state.isOver) {
     printStatus(state);
@@ -265,7 +330,11 @@ async function runGameLoop(state: GameState): Promise<void> {
       printLine(chalk.gray('  The other factions bide their time...'));
     }
 
-    [...resLogs, ...aiLogs].forEach((l) => state.gameLog.push(l));
+    // Tick diplomacy: expire peace treaties
+    const diploLogs = tickDiplomacy(state);
+    diploLogs.forEach((l) => printLine(chalk.blue(`  ${l}`)));
+
+    [...resLogs, ...aiLogs, ...diploLogs].forEach((l) => state.gameLog.push(l));
 
     // AI narrator: turn summary
     const pFaction = state.factions.get(state.playerFactionId)!;

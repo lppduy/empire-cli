@@ -57,6 +57,10 @@ You get **3 actions per turn**. `map`, `info`, `status`, `help`, `save` are free
 | `build <territory> <type>` | Build walls/barracks/market |
 | `next` | End turn early |
 | `save [slot]` | Save game |
+| `ally <faction>` | Propose alliance |
+| `peace <faction>` | Propose peace treaty |
+| `trade <faction> <n> <res> for <res>` | Trade resources |
+| `diplo` | View diplomatic relations |
 | `help` | Show commands |
 | `quit` | Exit |
 
@@ -106,7 +110,7 @@ Config saved at `~/.empire-cli/config.json`.
 - [x] Save/load game
 - [x] Action limit per turn (3 actions)
 - [x] AI Game Master (Gemini / Ollama) — optional epic narration
-- [ ] Diplomacy system (alliances, trade, peace)
+- [x] Diplomacy system (alliances, trade, peace)
 - [x] Buildings (walls, barracks, markets)
 - [ ] More maps & factions
 - [x] npm package (`npx empire-cli`) [![npm](https://img.shields.io/npm/v/empire-cli)](https://www.npmjs.com/package/empire-cli)

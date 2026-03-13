@@ -53,6 +53,16 @@ export interface CombatResult {
   log: string[];
 }
 
+export type DiplomaticStatus = 'neutral' | 'allied' | 'peace' | 'hostile';
+
+export interface DiplomaticRelation {
+  factionA: string;       // faction id (alphabetically first)
+  factionB: string;       // faction id (alphabetically second)
+  status: DiplomaticStatus;
+  turnsRemaining: number; // -1 for permanent (alliance), N for peace treaty
+  initiatedBy: string;    // who proposed
+}
+
 export interface GameState {
   turn: number;
   territories: Map<string, Territory>;
@@ -60,6 +70,7 @@ export interface GameState {
   armies: Map<string, Army>;
   playerFactionId: string;
   gameLog: string[];
+  diplomacy: DiplomaticRelation[];
   isOver: boolean;
   winner: string | null;
 }
@@ -77,6 +88,7 @@ export interface SaveData {
   armies: Record<string, Army>;
   playerFactionId: string;
   gameLog: string[];
+  diplomacy?: DiplomaticRelation[];
   isOver: boolean;
   winner: string | null;
   savedAt: string;

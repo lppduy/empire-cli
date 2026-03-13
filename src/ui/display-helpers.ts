@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import type { GameState } from '../game-types.js';
 import { findArmyInTerritory } from '../engine/army-manager.js';
 import { BUILDINGS } from '../engine/building-manager.js';
+import { getFactionRelations } from '../engine/diplomacy-manager.js';
 
 export const ICONS: Record<string, string> = {
   city: '🏰', forest: '🌲', mountain: '⛰️ ', plains: '🌾',
@@ -26,6 +27,19 @@ export function printStatus(state: GameState): void {
   printLine(colorFn(`  ${ICONS.crown} ${player.name}  —  Turn ${state.turn}`));
   printLine(`  ${ICONS.gold} ${chalk.yellow(player.gold)}  ${ICONS.food} ${chalk.green(player.food)}  ${ICONS.wood} ${chalk.blue(player.wood)}  ${ICONS.stone} ${chalk.gray(player.stone)}`);
   printLine(`  ${ICONS.army} Armies: ${player.totalArmies}  |  ${ICONS.flag} Territories: ${player.territories.length}/${state.territories.size}`);
+  // Diplomatic relations summary
+  const rels = getFactionRelations(state.diplomacy, state.playerFactionId);
+  if (rels.length > 0) {
+    const relStrs = rels.map((r) => {
+      const otherId = r.factionA === state.playerFactionId ? r.factionB : r.factionA;
+      const other = state.factions.get(otherId);
+      if (!other) return '';
+      const icon = r.status === 'allied' ? '🤝' : r.status === 'peace' ? '🕊️ ' : '⚔️ ';
+      const extra = r.turnsRemaining > 0 ? `(${r.turnsRemaining}t)` : '';
+      return `${icon}${other.name}${extra}`;
+    }).filter(Boolean);
+    printLine(`  ${relStrs.join('  ')}`);
+  }
   printSeparator();
 }
 
@@ -42,6 +56,12 @@ export function printHelp(): void {
   printLine('  save [slot]                 — save game');
   printLine('  quit                        — exit game');
   printLine('  help                        — show this help');
+  printLine('');
+  printLine(chalk.cyan('  Diplomacy:'));
+  printLine('  ally <faction>              — propose alliance');
+  printLine('  peace <faction>             — propose peace treaty');
+  printLine('  trade <faction> <n> <res> for <res> — trade resources');
+  printLine('  diplo                       — view diplomatic relations');
   printLine('');
   printLine(chalk.cyan('  Buildings:'));
   for (const b of Object.values(BUILDINGS)) {

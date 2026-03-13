@@ -2,6 +2,7 @@
 import type { GameState } from '../game-types.js';
 import { resolveCombat } from './combat-resolver.js';
 import { findArmyInTerritory, getUnitsInTerritory, applyCasualties } from './army-manager.js';
+import { getDiplomaticStatus, breakRelation } from './diplomacy-manager.js';
 
 export function runAiTurns(state: GameState): string[] {
   const log: string[] = [];
@@ -33,12 +34,28 @@ export function runAiTurns(state: GameState): string[] {
       }
     }
 
+    // Desperate aggressive AI breaks alliances
+    if (faction.territories.length <= 1 && faction.gold < 5 && faction.personality === 'aggressive') {
+      for (let i = state.diplomacy.length - 1; i >= 0; i--) {
+        const rel = state.diplomacy[i];
+        if ((rel.factionA === faction.id || rel.factionB === faction.id) && rel.status === 'allied') {
+          breakRelation(state.diplomacy, rel.factionA, rel.factionB);
+          log.push(`${faction.name} has broken their alliance! Desperate times...`);
+        }
+      }
+    }
+
     // Try to attack one adjacent weak territory
     for (const territoryId of [...faction.territories]) {
       const territory = state.territories.get(territoryId)!;
       for (const adjId of territory.adjacentTo) {
         const adj = state.territories.get(adjId)!;
         if (adj.owner === faction.id) continue;
+        // Skip allies and factions at peace
+        if (adj.owner) {
+          const status = getDiplomaticStatus(state.diplomacy, faction.id, adj.owner);
+          if (status === 'allied' || status === 'peace') continue;
+        }
 
         const attackerUnits = getUnitsInTerritory(faction.id, territoryId, state.armies);
         const defenderUnits = adj.armies;

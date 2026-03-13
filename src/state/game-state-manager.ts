@@ -43,6 +43,7 @@ export function newGame(playerFactionId: string): GameState {
     factions,
     armies,
     playerFactionId,
+    diplomacy: [],
     gameLog: ['A new empire rises. Your destiny awaits.'],
     isOver: false,
     winner: null,
@@ -59,6 +60,7 @@ export function toSaveData(state: GameState): SaveData {
     factions: Object.fromEntries(state.factions),
     armies: Object.fromEntries(state.armies),
     playerFactionId: state.playerFactionId,
+    diplomacy: state.diplomacy,
     gameLog: state.gameLog.slice(-50), // keep last 50 entries
     isOver: state.isOver,
     winner: state.winner,
@@ -80,6 +82,7 @@ export function fromSaveData(data: SaveData): GameState {
     factions: new Map(Object.entries(data.factions)),
     armies: new Map(Object.entries(data.armies)),
     playerFactionId: data.playerFactionId,
+    diplomacy: data.diplomacy ?? [],
     gameLog: data.gameLog,
     isOver: data.isOver,
     winner: data.winner,
