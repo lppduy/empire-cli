@@ -7,6 +7,7 @@ import { getSystemInstruction } from './narrator-prompts.js';
 
 const TIMEOUT_MS = 5000;
 let geminiModel: GenerativeModel | null = null;
+let hasWarnedFailure = false;
 
 function getGeminiModel(apiKey: string): GenerativeModel {
   if (!geminiModel) {
@@ -66,5 +67,10 @@ export async function generateNarration(
     return callOllama(prompt, config.ollamaModel ?? 'llama3');
   }
   if (!config.apiKey) return null;
-  return callGemini(prompt, config.apiKey);
+  const result = await callGemini(prompt, config.apiKey);
+  if (!result && !hasWarnedFailure) {
+    hasWarnedFailure = true;
+    console.log('\x1b[33m  ⚠ Narrator unavailable (API error or quota exceeded). Narration disabled for this session.\x1b[0m');
+  }
+  return result;
 }
