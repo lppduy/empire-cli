@@ -1,6 +1,6 @@
 {
   "name": "empire-cli",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "CLI strategy RPG with AI game master",
   "type": "module",
   "main": "dist/index.js",
